@@ -78,6 +78,35 @@
         body.force-mobile-device #mobile-bottom-nav {
             display: flex !important;
         }
+        /* Hide desktop header buttons and show mobile header buttons when force-mobile-device is active */
+        body.force-mobile-device #desktop-header-actions {
+            display: none !important;
+        }
+        body.force-mobile-device #mobile-header-actions {
+            display: flex !important;
+        }
+        /* When iOS Safari forces a 980px Desktop Viewport on a phone, enlarge all UI & fonts proportionally */
+        html.ios-desktop-viewport-fix {
+            font-size: 34px !important; /* 2.125x base rem scaling so 980px looks like 430px native mobile */
+        }
+        html.ios-desktop-viewport-fix .seat-card {
+            min-height: 155px !important;
+            padding: 10px 6px !important;
+            border-radius: 18px !important;
+            border-width: 3px !important;
+        }
+        html.ios-desktop-viewport-fix .seat-name-text {
+            font-size: 30px !important;
+            line-height: 1.25 !important;
+        }
+        html.ios-desktop-viewport-fix .seat-top-badge {
+            font-size: 20px !important;
+            padding: 2px 8px !important;
+        }
+        html.ios-desktop-viewport-fix .fit-screen-grid .seat-meta-row,
+        html.ios-desktop-viewport-fix .fit-screen-grid .seat-action-group {
+            display: none !important;
+        }
         /* Mobile Compact Fit-to-Screen Grid (Prevents horizontal overflow on 360px-430px phones) */
         @media (max-width: 768px) {
             .fit-screen-grid .seat-card {
@@ -286,12 +315,12 @@
                         <h1 class="text-base sm:text-lg lg:text-xl font-bold text-slate-900 tracking-tight truncate">
                             班級智慧排座位
                         </h1>
-                        <p class="text-xs text-slate-500 hidden xl:block truncate">確保每位學生清楚看見黑板，</p>
+                        <p class="text-xs text-slate-500 hidden xl:block truncate">確保每位學生清楚看見黑板</p>
                     </div>
                 </div>
 
                 <!-- Tablet & Desktop Top Actions -->
-                <div class="hidden md:flex items-center gap-1.5 lg:gap-2 flex-wrap justify-end">
+                <div id="desktop-header-actions" class="hidden md:flex items-center gap-1.5 lg:gap-2 flex-wrap justify-end">
                     <button type="button" onclick="startLuckyDraw()" class="px-2.5 py-1.5 text-xs lg:text-sm font-semibold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-xl flex items-center gap-1 transition cursor-pointer">
                         <i class="ph-fill ph-dice-five text-base text-amber-600"></i>
                         <span>抽籤</span>
@@ -318,8 +347,16 @@
                     </button>
                 </div>
 
-                <!-- Mobile Compact Top Actions -->
-                <div class="flex md:hidden items-center gap-1.5 shrink-0">
+                <!-- Mobile Compact Top Actions + Instant UI Scale Buttons -->
+                <div id="mobile-header-actions" class="flex md:hidden items-center gap-1.5 shrink-0">
+                    <div class="flex items-center bg-indigo-50 border border-indigo-200 rounded-xl p-0.5">
+                        <button type="button" onclick="adjustMobileUiScale(-0.15)" class="px-2 py-1 text-indigo-700 font-extrabold text-xs active:bg-indigo-100 rounded-lg" title="縮小介面">
+                            A-
+                        </button>
+                        <button type="button" onclick="adjustMobileUiScale(0.15)" class="px-2 py-1 text-indigo-700 font-extrabold text-xs active:bg-indigo-100 rounded-lg" title="放大介面">
+                            A+
+                        </button>
+                    </div>
                     <button type="button" onclick="openStatsModal()" class="p-2 text-slate-700 bg-slate-100 active:bg-slate-200 rounded-xl" title="統計">
                         <i class="ph-bold ph-chart-bar text-base"></i>
                     </button>
@@ -882,7 +919,8 @@
             cleanPrintRenderMode: 'table',
             cleanPrintOrientation: 'landscape',
             fitToScreen: true,
-            activeMobilePanel: 'grid'
+            activeMobilePanel: 'grid',
+            customUiScale: 1.0
         };
 
         const STORAGE_KEY = 'CLASSROOM_SEATING_PLANNER_STATE_V2';
@@ -917,9 +955,40 @@
         };
 
         function isMobileHardware() {
-            const touchMobile = /iPhone|iPod|Android.*Mobile|Windows Phone/i.test(navigator.userAgent);
-            const smallScreen = Math.min(window.screen.width, window.screen.height) < 500;
-            return touchMobile || smallScreen || window.innerWidth < 1024;
+            const touchPoints = navigator.maxTouchPoints && navigator.maxTouchPoints > 1;
+            const uaMobile = /iPhone|iPod|Android|Mobile|iPad/i.test(navigator.userAgent);
+            const smallPhysicalScreen = Math.min(window.screen.width, window.screen.height) <= 540;
+            return smallPhysicalScreen || uaMobile || (touchPoints && window.innerWidth < 1024);
+        }
+
+        function applyMobileViewportScaleCompensation() {
+            const htmlEl = document.documentElement;
+            const isPhone = isMobileHardware();
+
+            // Detect when iOS Safari forces a 980px Desktop Viewport onto a physical phone screen
+            const physicalWidth = Math.min(window.screen.width, window.screen.height) || 390;
+            const layoutWidth = window.innerWidth;
+
+            if (isPhone && layoutWidth > 600 && physicalWidth <= 500) {
+                htmlEl.classList.add('ios-desktop-viewport-fix');
+                const autoRatio = Math.min(2.4, Math.max(1.85, (layoutWidth / physicalWidth) * 0.92));
+                const finalRemPx = Math.round(16 * autoRatio * state.customUiScale);
+                htmlEl.style.setProperty('font-size', `${finalRemPx}px`, 'important');
+            } else if (isPhone) {
+                htmlEl.classList.remove('ios-desktop-viewport-fix');
+                const finalRemPx = Math.round(16 * state.customUiScale);
+                htmlEl.style.setProperty('font-size', `${finalRemPx}px`, 'important');
+            } else {
+                htmlEl.classList.remove('ios-desktop-viewport-fix');
+                htmlEl.style.removeProperty('font-size');
+            }
+        }
+
+        function adjustMobileUiScale(delta) {
+            state.customUiScale = Math.max(0.75, Math.min(1.8, (state.customUiScale || 1.0) + delta));
+            applyMobileViewportScaleCompensation();
+            renderClassroomGrid();
+            showToast(`已調整介面顯示比例 (${Math.round(state.customUiScale * 100)}%)`, 'indigo');
         }
 
         function syncResponsivePanels() {
@@ -927,13 +996,10 @@
             const gridSec = document.getElementById('classroom-section');
             const isMobile = isMobileHardware();
 
+            applyMobileViewportScaleCompensation();
+
             if (isMobile) {
                 document.body.classList.add('force-mobile-device');
-                // Adjust viewport dynamically if iOS forced a 980px desktop viewport on a phone screen
-                const vp = document.querySelector('meta[name="viewport"]');
-                if (vp && window.screen.width < 500 && window.innerWidth > 600) {
-                    vp.setAttribute('content', `width=${window.screen.width}, initial-scale=1.0, viewport-fit=cover`);
-                }
                 setMobileView(state.activeMobilePanel || 'grid');
             } else {
                 document.body.classList.remove('force-mobile-device');
