@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="google-site-verification" content="VPl5okPV-nj8he63oPqRouQjdrndKMfoCK82_iudYGA" />
-    <title>班級智慧排座位系統｜跨裝置自適應版</title>
+    <title>班級智慧排座位系統</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -11,11 +11,13 @@
         :root {
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
-        body {
+        html, body {
             font-family: 'Noto Sans TC', 'Inter', sans-serif;
             background-color: #f8fafc;
             touch-action: manipulation;
             -webkit-font-smoothing: antialiased;
+            max-width: 100vw;
+            overflow-x: hidden;
         }
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
@@ -37,6 +39,7 @@
             transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            min-width: 0; /* Critical: prevents CSS grid blowout on mobile */
         }
         .seat-card:active {
             transform: scale(0.97);
@@ -56,31 +59,35 @@
         }
         /* Safe Area Padding for Mobile Bottom Bar */
         .pb-safe-nav {
-            padding-bottom: calc(4.25rem + var(--safe-bottom));
+            padding-bottom: calc(4.5rem + var(--safe-bottom));
         }
         #mobile-bottom-nav {
-            padding-bottom: calc(0.35rem + var(--safe-bottom));
+            padding-bottom: calc(0.4rem + var(--safe-bottom));
         }
-        /* Compact Fit-to-Screen Mode on Mobile/Tablet */
-        .fit-screen-grid .seat-card {
-            min-height: 58px !important;
-            padding: 3px 4px !important;
-            border-radius: 8px !important;
-        }
-        .fit-screen-grid .seat-name-text {
-            font-size: 11px !important;
-            line-height: 1.15 !important;
-        }
-        .fit-screen-grid .seat-meta-row {
-            display: none !important;
-        }
-        .fit-screen-grid .seat-top-badge {
-            font-size: 9px !important;
-            padding: 0 3px !important;
-        }
-        .fit-screen-grid .seat-action-btn {
-            width: 16px !important;
-            height: 16px !important;
+        /* Mobile Compact Fit-to-Screen Grid (Prevents horizontal overflow on 360px-430px phones) */
+        @media (max-width: 640px) {
+            .fit-screen-grid .seat-card {
+                min-height: 64px !important;
+                padding: 3px 2px !important;
+                border-radius: 8px !important;
+                border-width: 1.5px !important;
+            }
+            .fit-screen-grid .seat-name-text {
+                font-size: 12px !important;
+                line-height: 1.2 !important;
+                letter-spacing: -0.02em;
+            }
+            .fit-screen-grid .seat-meta-row {
+                display: none !important;
+            }
+            .fit-screen-grid .seat-action-group {
+                display: none !important;
+            }
+            .fit-screen-grid .seat-top-badge {
+                font-size: 9px !important;
+                padding: 0 3px !important;
+                line-height: 1.3 !important;
+            }
         }
         /* Clean Print Mode Styles */
         body.clean-print-mode {
@@ -195,9 +202,6 @@
                     <span class="px-2 py-0.5 bg-emerald-400 text-slate-950 font-extrabold text-xs rounded-lg flex items-center gap-1">
                         <i class="ph-bold ph-check-circle"></i> 純淨列印 / 滿版檢視
                     </span>
-                    <span class="text-xs text-slate-300 hidden md:inline">
-                        自適應紙張比例，支援直接列印或長按儲存圖片。
-                    </span>
                 </div>
 
                 <!-- Layout & Display Controls -->
@@ -242,20 +246,19 @@
     </div>
 
     <!-- Main Interactive Workspace Wrapper -->
-    <div id="app-workspace" class="flex-1 flex flex-col min-h-screen">
+    <div id="app-workspace" class="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
         <!-- Top Navigation Bar -->
-        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 no-print shadow-xs">
-            <div class="max-w-[1680px] mx-auto px-3 sm:px-5 lg:px-6 py-2 sm:py-3 flex justify-between items-center gap-2">
-                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200 shrink-0">
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 no-print shadow-xs w-full">
+            <div class="max-w-[1680px] mx-auto px-3 sm:px-5 lg:px-6 py-2.5 flex justify-between items-center gap-2">
+                <div class="flex items-center gap-2 min-w-0">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-sm shrink-0">
                         <i class="ph-fill ph-student text-lg sm:text-2xl"></i>
                     </div>
                     <div class="min-w-0">
-                        <h1 class="text-sm sm:text-lg lg:text-xl font-bold text-slate-900 tracking-tight flex items-center gap-1.5 truncate">
-                            <span>班級智慧排座位</span>
-                            <span class="hidden xs:inline-block text-[10px] sm:text-xs font-medium bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-200 shrink-0">跨裝置適配</span>
+                        <h1 class="text-base sm:text-lg lg:text-xl font-bold text-slate-900 tracking-tight truncate">
+                            班級智慧排座位
                         </h1>
-                        <p class="text-xs text-slate-500 hidden xl:block truncate">確保每位學生清楚看見黑板，自動隔離閨密並支援手機、平板與電腦全尺寸瀏覽</p>
+                        <p class="text-xs text-slate-500 hidden xl:block truncate">確保每位學生清楚看見黑板</p>
                     </div>
                 </div>
 
@@ -277,7 +280,7 @@
                         <i class="ph ph-magic-wand text-base text-indigo-600"></i>
                         <span class="hidden lg:inline">隨機資料</span>
                     </button>
-                    <button type="button" onclick="runAutoSeating()" class="px-3 py-1.5 text-xs lg:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm shadow-indigo-200 flex items-center gap-1 transition cursor-pointer">
+                    <button type="button" onclick="runAutoSeating()" class="px-3 py-1.5 text-xs lg:text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm flex items-center gap-1 transition cursor-pointer">
                         <i class="ph-bold ph-sparkle text-base"></i>
                         <span>一鍵排座位</span>
                     </button>
@@ -288,26 +291,25 @@
                 </div>
 
                 <!-- Mobile Compact Top Actions -->
-                <div class="flex md:hidden items-center gap-1">
-                    <button type="button" onclick="openStatsModal()" class="p-1.5 text-slate-600 bg-slate-100 rounded-lg" title="統計">
+                <div class="flex md:hidden items-center gap-1.5 shrink-0">
+                    <button type="button" onclick="openStatsModal()" class="p-2 text-slate-700 bg-slate-100 active:bg-slate-200 rounded-xl" title="統計">
                         <i class="ph-bold ph-chart-bar text-base"></i>
                     </button>
-                    <button type="button" onclick="openBackupModal()" class="p-1.5 text-slate-600 bg-slate-100 rounded-lg" title="備份">
+                    <button type="button" onclick="openBackupModal()" class="p-2 text-slate-700 bg-slate-100 active:bg-slate-200 rounded-xl" title="備份">
                         <i class="ph-bold ph-floppy-disk text-base"></i>
                     </button>
-                    <button type="button" onclick="runAutoSeating()" class="px-2.5 py-1.5 text-xs font-bold text-white bg-indigo-600 active:bg-indigo-700 rounded-lg shadow-xs flex items-center gap-1">
-                        <i class="ph-bold ph-sparkle"></i>
-                        <span>排位</span>
+                    <button type="button" onclick="generateRandomTestRoster()" class="p-2 text-indigo-600 bg-indigo-50 active:bg-indigo-100 rounded-xl" title="隨機名單">
+                        <i class="ph-bold ph-magic-wand text-base"></i>
                     </button>
                 </div>
             </div>
         </header>
 
         <!-- Main Responsive Grid Layout -->
-        <main id="main-layout" class="flex-1 max-w-[1680px] w-full mx-auto p-2 sm:p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
+        <main id="main-layout" class="flex-1 max-w-[1680px] w-full mx-auto p-2 sm:p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-5 items-start">
             
             <!-- Left Control Panel (Settings, Roster, BFF Separation) -->
-            <aside id="left-panel-aside" class="lg:col-span-5 xl:col-span-4 w-full flex flex-col bg-white rounded-2xl shadow-xs border border-slate-200 overflow-hidden no-print lg:sticky lg:top-20 lg:max-h-[calc(100vh-6.5rem)]">
+            <aside id="left-panel-aside" class="lg:col-span-5 xl:col-span-4 w-full min-w-0 flex flex-col bg-white rounded-2xl shadow-xs border border-slate-200 overflow-hidden no-print lg:sticky lg:top-20 lg:max-h-[calc(100vh-6.5rem)]">
                 <!-- Tabs Navigation -->
                 <div class="grid grid-cols-3 border-b border-slate-200 bg-slate-50/70 p-1.5 gap-1 shrink-0">
                     <button onclick="switchTab('tab-config')" id="btn-tab-config" class="tab-btn py-2 px-2 rounded-xl text-xs sm:text-sm font-semibold flex items-center justify-center gap-1 bg-white text-indigo-600 shadow-xs transition">
@@ -340,8 +342,8 @@
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">班級學生人數</label>
                                 <div class="relative">
                                     <input type="number" id="input-student-count" min="1" max="80" value="30" onchange="handleConfigChange()"
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none">
-                                    <span class="absolute right-2.5 top-1.5 text-xs text-slate-400">人</span>
+                                        class="w-full px-2.5 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <span class="absolute right-2.5 top-2 text-xs text-slate-400">人</span>
                                 </div>
                             </div>
 
@@ -349,20 +351,20 @@
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">直行排數 (列數)</label>
                                 <div class="relative">
                                     <input type="number" id="input-cols" min="2" max="12" value="6" onchange="handleConfigChange()"
-                                        class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none">
-                                    <span class="absolute right-2.5 top-1.5 text-xs text-slate-400">排</span>
+                                        class="w-full px-2.5 py-2 bg-white border border-slate-300 rounded-lg text-sm font-semibold text-slate-900 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                    <span class="absolute right-2.5 top-2 text-xs text-slate-400">排</span>
                                 </div>
                             </div>
 
                             <div class="col-span-2 pt-2 border-t border-slate-200/80 flex items-center justify-between">
                                 <div>
                                     <label class="block text-xs font-semibold text-slate-700">預留空列數</label>
-                                    <p class="text-[10px] text-slate-500">增加橫列供設置不排人位置</p>
+                                    <p class="text-[11px] text-slate-500">增加橫列供設置不排人位置</p>
                                 </div>
                                 <div class="flex items-center gap-1.5">
-                                    <button onclick="adjustExtraRows(-1)" class="w-7 h-7 rounded-lg bg-white border border-slate-300 flex items-center justify-center hover:bg-slate-100 text-slate-700 font-bold">-</button>
-                                    <span id="display-total-rows" class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200 min-w-[64px] text-center">6 橫列</span>
-                                    <button onclick="adjustExtraRows(1)" class="w-7 h-7 rounded-lg bg-white border border-slate-300 flex items-center justify-center hover:bg-slate-100 text-slate-700 font-bold">+</button>
+                                    <button onclick="adjustExtraRows(-1)" class="w-8 h-8 rounded-lg bg-white border border-slate-300 flex items-center justify-center hover:bg-slate-100 text-slate-700 font-bold">-</button>
+                                    <span id="display-total-rows" class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1.5 rounded-lg border border-indigo-200 min-w-[64px] text-center">6 橫列</span>
+                                    <button onclick="adjustExtraRows(1)" class="w-8 h-8 rounded-lg bg-white border border-slate-300 flex items-center justify-center hover:bg-slate-100 text-slate-700 font-bold">+</button>
                                 </div>
                             </div>
                         </div>
@@ -381,13 +383,13 @@
                         </h3>
                         <div class="p-3 rounded-xl bg-amber-50/90 border border-amber-200 text-xs text-amber-900 space-y-2">
                             <p class="leading-relaxed">
-                                點擊座位上的 <strong><i class="ph-bold ph-prohibit"></i></strong> 即可切換為保留空位。
+                                點選座位後可將該位置設為「不排人」或「📌 釘選固定」。
                             </p>
                             <div class="flex flex-wrap gap-1.5">
-                                <button onclick="clearAllDisabledSeats()" class="px-2.5 py-1 bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg text-xs font-medium transition">
+                                <button onclick="clearAllDisabledSeats()" class="px-2.5 py-1.5 bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg text-xs font-medium transition">
                                     清除空位標記
                                 </button>
-                                <button onclick="disableBackCorners()" class="px-2.5 py-1 bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg text-xs font-medium transition">
+                                <button onclick="disableBackCorners()" class="px-2.5 py-1.5 bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-lg text-xs font-medium transition">
                                     後排角落設為空位
                                 </button>
                             </div>
@@ -404,7 +406,7 @@
                         <div class="space-y-2.5 bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200/80">
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">身高視線無遮擋模式</label>
-                                <select id="select-height-mode" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <select id="select-height-mode" class="w-full px-2.5 py-2 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none">
                                     <option value="strict">嚴格前低後高 (徹底防止遮擋)</option>
                                     <option value="flexible">彈性視線分區 (優先隔離閨密)</option>
                                 </select>
@@ -412,7 +414,7 @@
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">閨密安全隔離距離</label>
-                                <select id="select-bff-distance" onchange="validateCurrentSeating()" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <select id="select-bff-distance" onchange="validateCurrentSeating()" class="w-full px-2.5 py-2 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none">
                                     <option value="1.5" selected>九宮格完全隔離 (距離 > 1.5 格)</option>
                                     <option value="1.0">十字不相鄰 (允許斜對角)</option>
                                     <option value="2.2">超遠距離隔離 (間隔兩格以上)</option>
@@ -421,7 +423,7 @@
 
                             <div>
                                 <label class="block text-xs font-semibold text-slate-700 mb-1">性別鄰座偏好</label>
-                                <select id="select-gender-mode" class="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <select id="select-gender-mode" class="w-full px-2.5 py-2 bg-white border border-slate-300 rounded-lg text-xs font-medium text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none">
                                     <option value="mixed">自然隨機混排</option>
                                     <option value="checkerboard">男女梅花座交錯</option>
                                     <option value="same_pair">同性鄰座優先</option>
@@ -432,15 +434,15 @@
                 </div>
 
                 <!-- Tab 2: Student Roster Management -->
-                <div id="tab-roster" class="tab-content hidden flex-1 flex flex-col overflow-hidden max-h-[70vh] lg:max-h-none">
+                <div id="tab-roster" class="tab-content hidden flex-1 flex flex-col overflow-hidden max-h-[72vh] lg:max-h-none">
                     <div class="p-3 bg-slate-50 border-b border-slate-200 space-y-2 shrink-0">
                         <div class="flex items-center justify-between gap-1">
                             <span class="text-xs font-bold text-slate-700">學生性別與身高設定</span>
                             <div class="flex gap-1">
-                                <button onclick="openBatchImportModal()" class="px-2 py-1 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-medium flex items-center gap-1 transition">
+                                <button onclick="openBatchImportModal()" class="px-2.5 py-1 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-medium flex items-center gap-1 transition">
                                     <i class="ph ph-upload-simple"></i> 匯入名單
                                 </button>
-                                <button onclick="randomizeAttributes()" class="px-2 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-lg text-xs font-medium flex items-center gap-1 transition">
+                                <button onclick="randomizeAttributes()" class="px-2.5 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-lg text-xs font-medium flex items-center gap-1 transition">
                                     <i class="ph ph-shuffle"></i> 隨機身高
                                 </button>
                             </div>
@@ -460,7 +462,7 @@
                 </div>
 
                 <!-- Tab 3: BFF / Chatty Pair Separation -->
-                <div id="tab-bff" class="tab-content hidden flex-1 flex flex-col overflow-hidden max-h-[70vh] lg:max-h-none">
+                <div id="tab-bff" class="tab-content hidden flex-1 flex flex-col overflow-hidden max-h-[72vh] lg:max-h-none">
                     <div class="p-3 bg-rose-50/60 border-b border-rose-100 space-y-2 shrink-0">
                         <h4 class="text-xs font-bold text-rose-950 flex items-center gap-1">
                             <i class="ph-fill ph-warning-octagon text-rose-600"></i>
@@ -468,7 +470,7 @@
                         </h4>
                         <div class="bg-white p-2.5 rounded-xl border border-rose-200 space-y-2 shadow-2xs">
                             <label class="block text-[11px] font-semibold text-slate-700">勾選需要分開坐的學生 (2~4人)：</label>
-                            <div id="bff-student-selector" class="max-h-32 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-1 p-1.5 bg-slate-50 rounded-lg border border-slate-200 text-xs">
+                            <div id="bff-student-selector" class="max-h-36 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-1 p-1.5 bg-slate-50 rounded-lg border border-slate-200 text-xs">
                                 <!-- Checkboxes -->
                             </div>
                             <div class="flex items-center gap-1.5 pt-1">
@@ -487,36 +489,29 @@
             </aside>
 
             <!-- Right Main Area: Classroom Interactive Grid -->
-            <section id="classroom-section" class="lg:col-span-7 xl:col-span-8 w-full flex flex-col bg-white rounded-2xl shadow-xs border border-slate-200 overflow-hidden">
+            <section id="classroom-section" class="lg:col-span-7 xl:col-span-8 w-full min-w-0 flex flex-col bg-white rounded-2xl shadow-xs border border-slate-200 overflow-hidden">
                 
                 <!-- Multi-Device Classroom Toolbar -->
-                <div class="p-2.5 sm:p-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 bg-slate-50/70 no-print">
-                    <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                        <button type="button" onclick="togglePerspective()" id="btn-perspective" class="px-2.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 rounded-lg text-xs font-semibold text-slate-700 flex items-center gap-1 shadow-2xs cursor-pointer">
+                <div class="p-2 sm:p-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-1.5 bg-slate-50/70 no-print">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <button type="button" onclick="togglePerspective()" id="btn-perspective" class="px-2.5 py-1.5 bg-white border border-slate-300 active:bg-slate-100 rounded-lg text-xs font-semibold text-slate-700 flex items-center gap-1 shadow-2xs cursor-pointer">
                             <i class="ph-bold ph-arrows-down-up text-indigo-600"></i>
                             <span id="perspective-label">黑板在上方</span>
                         </button>
 
-                        <div id="validation-status-badge" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <div id="validation-status-badge" class="px-2 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200">
                             <i class="ph-fill ph-check-circle text-xs"></i>
                             <span>視線正常</span>
                         </div>
                     </div>
 
                     <!-- Responsive View Controls: Auto-Fit Screen vs Custom Zoom + Quick Shift -->
-                    <div class="flex items-center gap-1.5 sm:gap-2 text-xs flex-wrap">
-                        <!-- Fit-to-Screen Toggle Button (Great for Mobile/Tablet Overview) -->
-                        <button type="button" id="btn-fit-screen" onclick="toggleFitToScreen()" class="px-2.5 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1 transition cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-50 shadow-2xs" title="自動縮放讓所有排數完整塞入目前螢幕寬度">
-                            <i class="ph-bold ph-corners-out text-indigo-600"></i>
-                            <span id="fit-screen-label">適應螢幕</span>
+                    <div class="flex items-center gap-1.5 text-xs flex-wrap">
+                        <!-- Fit-to-Screen Toggle Button -->
+                        <button type="button" id="btn-fit-screen" onclick="toggleFitToScreen()" class="px-2.5 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1 transition cursor-pointer bg-indigo-600 text-white border-indigo-600 shadow-xs">
+                            <i class="ph-bold ph-device-mobile"></i>
+                            <span id="fit-screen-label">一頁全覽</span>
                         </button>
-
-                        <!-- Seat Width Zoom Slider -->
-                        <div id="zoom-slider-wrap" class="hidden sm:flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-lg border border-slate-300 shadow-2xs">
-                            <i class="ph-bold ph-magnifying-glass-minus text-slate-400 text-xs"></i>
-                            <input type="range" id="mobile-seat-scale" min="68" max="150" value="105" oninput="adjustSeatCellWidth(this.value)" class="w-16 md:w-20 accent-indigo-600 cursor-pointer">
-                            <i class="ph-bold ph-magnifying-glass-plus text-slate-400 text-xs"></i>
-                        </div>
 
                         <div class="flex items-center bg-white border border-slate-300 rounded-lg p-0.5 shadow-2xs">
                             <button type="button" onclick="sortBySeatNumber()" class="px-2 py-1 hover:bg-slate-100 text-slate-700 rounded text-xs font-semibold cursor-pointer" title="依座號排序">
@@ -533,40 +528,56 @@
                     </div>
                 </div>
 
-                <!-- Printable Header -->
-                <div id="print-only-header" class="hidden text-center py-4 border-b border-slate-300 bg-white">
-                    <h2 class="text-xl font-bold text-slate-900" id="print-main-title">班級座位表</h2>
-                    <p class="text-xs text-slate-600 mt-1" id="print-subtitle"></p>
+                <!-- Selected Seat Quick Action Bar (Especially helpful on Mobile!) -->
+                <div id="selected-seat-action-bar" class="hidden px-3 py-2 bg-indigo-950 text-white text-xs items-center justify-between gap-2 no-print">
+                    <div class="flex items-center gap-1.5 truncate">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping shrink-0"></span>
+                        <span id="selected-seat-info" class="font-bold truncate">已選取座位：請點另一格交換，或執行右側操作</span>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" id="btn-bar-pin" onclick="triggerBarPin()" class="px-2.5 py-1 bg-amber-500 text-slate-950 font-bold rounded-lg flex items-center gap-1">
+                            <i class="ph-fill ph-push-pin"></i> 釘選
+                        </button>
+                        <button type="button" id="btn-bar-disable" onclick="triggerBarDisable()" class="px-2.5 py-1 bg-rose-600 text-white font-bold rounded-lg flex items-center gap-1">
+                            <i class="ph-bold ph-prohibit"></i> 設空位
+                        </button>
+                        <button type="button" onclick="clearSelectedSeat()" class="px-2 py-1 bg-slate-800 text-slate-300 rounded-lg">
+                            取消
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Interactive Classroom Grid Container -->
-                <div class="flex-1 p-2 sm:p-4 md:p-5 flex flex-col justify-between bg-slate-100/60 overflow-x-auto relative min-h-[420px] sm:min-h-[540px]" id="classroom-container">
+                <div class="flex-1 p-1.5 sm:p-4 md:p-5 flex flex-col justify-between bg-slate-100/60 overflow-x-auto relative w-full" id="classroom-container">
                     
                     <!-- Top Blackboard Area -->
-                    <div id="blackboard-top" class="w-full max-w-xl mx-auto mb-2.5 sm:mb-4">
-                        <div class="bg-emerald-900 text-emerald-50 border-2 sm:border-4 border-amber-700 rounded-xl py-1.5 sm:py-2 px-3 sm:px-4 shadow-sm flex items-center justify-between text-xs sm:text-sm">
-                            <span class="text-emerald-200/80 text-[10px] sm:text-[11px]">前排 (矮個/視力區)</span>
+                    <div id="blackboard-top" class="w-full max-w-xl mx-auto mb-2 sm:mb-3">
+                        <div class="bg-emerald-900 text-emerald-50 border-2 sm:border-4 border-amber-700 rounded-xl py-1.5 px-3 shadow-xs flex items-center justify-between text-xs sm:text-sm">
+                            <span class="text-emerald-200/80 text-[10px] sm:text-xs">前排 (矮個/視力區)</span>
                             <span class="font-bold tracking-widest">黑 板 ／ 講 台</span>
-                            <span class="text-emerald-200/80 text-[10px] sm:text-[11px] hidden xs:inline">面向黑板</span>
+                            <span class="text-emerald-200/80 text-[10px] sm:text-xs">面向黑板</span>
                         </div>
                     </div>
 
-                    <!-- Column Headers -->
-                    <div id="column-headers" class="grid gap-1.5 sm:gap-2.5 mb-1.5 sm:mb-2 max-w-full mx-auto w-full">
-                        <!-- Populated by JS -->
-                    </div>
+                    <!-- Scrollable wrapper when in Horizontal Scroll Mode -->
+                    <div id="grid-scroll-wrapper" class="w-full overflow-x-auto pb-1">
+                        <!-- Column Headers -->
+                        <div id="column-headers" class="grid gap-1 sm:gap-2 mb-1 sm:mb-2 w-full">
+                            <!-- Populated by JS -->
+                        </div>
 
-                    <!-- Seating Grid -->
-                    <div id="seating-grid" class="grid gap-1.5 sm:gap-2.5 my-auto w-full mx-auto">
-                        <!-- Populated by JS -->
+                        <!-- Seating Grid -->
+                        <div id="seating-grid" class="grid gap-1 sm:gap-2 w-full">
+                            <!-- Populated by JS -->
+                        </div>
                     </div>
 
                     <!-- Bottom Blackboard Area -->
-                    <div id="blackboard-bottom" class="w-full max-w-xl mx-auto mt-2.5 sm:mt-4 hidden">
-                        <div class="bg-emerald-900 text-emerald-50 border-2 sm:border-4 border-amber-700 rounded-xl py-1.5 sm:py-2 px-3 sm:px-4 shadow-sm flex items-center justify-between text-xs sm:text-sm">
-                            <span class="text-emerald-200/80 text-[10px] sm:text-[11px]">講台教師視角</span>
+                    <div id="blackboard-bottom" class="w-full max-w-xl mx-auto mt-2 sm:mt-3 hidden">
+                        <div class="bg-emerald-900 text-emerald-50 border-2 sm:border-4 border-amber-700 rounded-xl py-1.5 px-3 shadow-xs flex items-center justify-between text-xs sm:text-sm">
+                            <span class="text-emerald-200/80 text-[10px] sm:text-xs">講台教師視角</span>
                             <span class="font-bold tracking-widest">黑 板 ／ 講 台</span>
-                            <span class="text-emerald-200/80 text-[10px] sm:text-[11px] hidden xs:inline">前排在此側</span>
+                            <span class="text-emerald-200/80 text-[10px] sm:text-xs">前排在此側</span>
                         </div>
                     </div>
 
@@ -576,7 +587,7 @@
                 <div class="p-2.5 sm:p-3 bg-white border-t border-slate-200 space-y-2">
                     <div id="conflict-details-box" class="hidden p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 space-y-1 no-print"></div>
 
-                    <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500">
+                    <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
                         <div class="flex items-center gap-2.5 flex-wrap">
                             <span class="font-bold text-slate-700">圖例：</span>
                             <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-sky-200 border border-sky-400"></span> 男生</span>
@@ -584,7 +595,7 @@
                             <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-slate-200 border border-slate-400 border-dashed"></span> 不排人</span>
                         </div>
                         <div class="text-[11px] text-slate-400">
-                            提示：依序點擊兩個座位即可交換位置
+                            點選任意兩格交換位置・點上方「一頁全覽/滑動大卡」切換尺寸
                         </div>
                     </div>
                 </div>
@@ -593,24 +604,24 @@
     </div>
 
     <!-- Mobile & Tablet Portrait Sticky Bottom Navigation Bar -->
-    <nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 pt-1.5 flex items-center justify-around shadow-lg no-print">
-        <button type="button" onclick="setMobileView('grid')" id="m-btn-grid" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-indigo-600 font-bold text-[11px]">
+    <nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-1 pt-1.5 flex items-center justify-around shadow-lg no-print">
+        <button type="button" onclick="setMobileView('grid')" id="m-btn-grid" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-indigo-600 font-bold text-xs">
             <i class="ph-bold ph-squares-four text-xl"></i>
             <span>座位表</span>
         </button>
-        <button type="button" onclick="setMobileView('settings')" id="m-btn-settings" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-500 font-medium text-[11px]">
+        <button type="button" onclick="setMobileView('settings')" id="m-btn-settings" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-500 font-medium text-xs">
             <i class="ph-bold ph-sliders text-xl"></i>
             <span>名單與設定</span>
         </button>
-        <button type="button" onclick="runAutoSeating()" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-emerald-600 font-bold text-[11px]">
+        <button type="button" onclick="runAutoSeating()" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-emerald-600 font-bold text-xs">
             <i class="ph-bold ph-sparkle text-xl"></i>
             <span>一鍵排位</span>
         </button>
-        <button type="button" onclick="startLuckyDraw()" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-amber-600 font-medium text-[11px]">
+        <button type="button" onclick="startLuckyDraw()" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-amber-600 font-medium text-xs">
             <i class="ph-fill ph-dice-five text-xl"></i>
             <span>抽籤</span>
         </button>
-        <button type="button" onclick="openExportCenterModal()" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-600 font-medium text-[11px]">
+        <button type="button" onclick="openExportCenterModal()" class="flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-600 font-medium text-xs">
             <i class="ph-bold ph-printer text-xl"></i>
             <span>列印/存圖</span>
         </button>
@@ -649,7 +660,7 @@
                     </div>
                     <div>
                         <h3 class="text-sm sm:text-base font-bold">座位表列印與匯出中心</h3>
-                        <p class="text-[11px] text-slate-300">手機/平板長按下方預覽圖即可直接儲存圖片或分享至 LINE</p>
+                        <p class="text-[11px] text-slate-300">手機長按下方預覽圖即可直接儲存圖片或分享至 LINE</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeExportCenterModal()" class="w-7 h-7 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center">
@@ -820,9 +831,9 @@
         };
 
         const GENDER_CONFIG = {
-            'M': { label: '男', cardClass: 'bg-sky-50/90 border-sky-300 hover:border-sky-400', headerClass: 'bg-sky-500 text-white', textClass: 'text-sky-900' },
-            'F': { label: '女', cardClass: 'bg-pink-50/90 border-pink-300 hover:border-pink-400', headerClass: 'bg-pink-500 text-white', textClass: 'text-pink-900' },
-            'O': { label: '其他', cardClass: 'bg-purple-50/90 border-purple-300 hover:border-purple-400', headerClass: 'bg-purple-500 text-white', textClass: 'text-purple-900' }
+            'M': { label: '男', cardClass: 'bg-sky-50/95 border-sky-300 hover:border-sky-400', headerClass: 'bg-sky-500 text-white', textClass: 'text-sky-950' },
+            'F': { label: '女', cardClass: 'bg-pink-50/95 border-pink-300 hover:border-pink-400', headerClass: 'bg-pink-500 text-white', textClass: 'text-pink-950' },
+            'O': { label: '其他', cardClass: 'bg-purple-50/95 border-purple-300 hover:border-purple-400', headerClass: 'bg-purple-500 text-white', textClass: 'text-purple-950' }
         };
 
         const SAMPLE_SURNAMES = ['陳', '林', '黃', '張', '李', '王', '吳', '劉', '蔡', '楊', '許', '鄭', '謝', '郭', '洪'];
@@ -842,8 +853,7 @@
             selectedSeatKey: null,
             cleanPrintRenderMode: 'table',
             cleanPrintOrientation: 'landscape',
-            mobileCellMinW: 105,
-            fitToScreen: false,
+            fitToScreen: true,
             activeMobilePanel: 'grid'
         };
 
@@ -853,10 +863,6 @@
          * INITIALIZATION & MULTI-DEVICE RESIZE LISTENER
          **************************************************************/
         window.onload = function() {
-            const today = new Date();
-            const sub = document.getElementById('print-subtitle');
-            if (sub) sub.innerText = `製表日期：${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日`;
-
             const loaded = loadStateFromLocalStorage();
             if (!loaded) {
                 initDefaultRoster(30);
@@ -872,12 +878,7 @@
                 updateUIAll();
             }
 
-            // Automatically enable Fit-to-Screen on compact mobile screens (< 640px) by default
-            if (window.innerWidth < 640) {
-                state.fitToScreen = true;
-                updateFitScreenButtonUI();
-            }
-
+            updateFitScreenButtonUI();
             syncResponsivePanels();
             renderClassroomGrid();
 
@@ -892,11 +893,9 @@
             const gridSec = document.getElementById('classroom-section');
 
             if (window.innerWidth >= 1024) {
-                // Desktop / Landscape Tablet: show both panels side-by-side
                 if (panel) panel.classList.remove('hidden');
                 if (gridSec) gridSec.classList.remove('hidden');
             } else {
-                // Mobile / Portrait Tablet: show active panel only
                 setMobileView(state.activeMobilePanel || 'grid');
             }
         }
@@ -917,13 +916,13 @@
             if (view === 'grid') {
                 if (panel) panel.classList.add('hidden');
                 if (gridSec) gridSec.classList.remove('hidden');
-                if (btnGrid) btnGrid.className = 'flex-1 py-1 flex flex-col items-center gap-0.5 text-indigo-600 font-bold text-[11px]';
-                if (btnSettings) btnSettings.className = 'flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-500 font-medium text-[11px]';
+                if (btnGrid) btnGrid.className = 'flex-1 py-1 flex flex-col items-center gap-0.5 text-indigo-600 font-bold text-xs';
+                if (btnSettings) btnSettings.className = 'flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-500 font-medium text-xs';
             } else {
                 if (panel) panel.classList.remove('hidden');
                 if (gridSec) gridSec.classList.add('hidden');
-                if (btnSettings) btnSettings.className = 'flex-1 py-1 flex flex-col items-center gap-0.5 text-indigo-600 font-bold text-[11px]';
-                if (btnGrid) btnGrid.className = 'flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-500 font-medium text-[11px]';
+                if (btnSettings) btnSettings.className = 'flex-1 py-1 flex flex-col items-center gap-0.5 text-indigo-600 font-bold text-xs';
+                if (btnGrid) btnGrid.className = 'flex-1 py-1 flex flex-col items-center gap-0.5 text-slate-500 font-medium text-xs';
             }
         }
 
@@ -931,31 +930,21 @@
             state.fitToScreen = !state.fitToScreen;
             updateFitScreenButtonUI();
             renderClassroomGrid();
-            showToast(state.fitToScreen ? '已開啟「適應螢幕寬度」全覽模式' : '已切換為「標準卡片尺寸」模式', 'indigo');
+            showToast(state.fitToScreen ? '已切換為「一頁全覽」模式' : '已切換為「左右滑動大卡片」模式', 'indigo');
         }
 
         function updateFitScreenButtonUI() {
             const btn = document.getElementById('btn-fit-screen');
             const label = document.getElementById('fit-screen-label');
-            const sliderWrap = document.getElementById('zoom-slider-wrap');
             if (!btn) return;
 
             if (state.fitToScreen) {
                 btn.className = 'px-2.5 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1 transition cursor-pointer bg-indigo-600 text-white border-indigo-600 shadow-xs';
-                label.innerText = '全覽適應中';
-                if (sliderWrap) sliderWrap.classList.add('opacity-40', 'pointer-events-none');
+                label.innerText = '一頁全覽 (點此換大卡)';
             } else {
                 btn.className = 'px-2.5 py-1.5 rounded-lg border text-xs font-semibold flex items-center gap-1 transition cursor-pointer bg-white text-slate-700 border-slate-300 hover:bg-slate-50 shadow-2xs';
-                label.innerText = '適應螢幕';
-                if (sliderWrap) sliderWrap.classList.remove('opacity-40', 'pointer-events-none');
+                label.innerText = '滑動大卡 (點此回全覽)';
             }
-        }
-
-        function adjustSeatCellWidth(val) {
-            state.fitToScreen = false;
-            updateFitScreenButtonUI();
-            state.mobileCellMinW = parseInt(val, 10) || 105;
-            renderClassroomGrid();
         }
 
         function saveStateToLocalStorage() {
@@ -1074,6 +1063,7 @@
             updateCapacityStatus();
             renderRosterList();
             renderBffSelectorAndGroups();
+            updateSelectedSeatBar();
             validateCurrentSeating();
             saveStateToLocalStorage();
         }
@@ -1093,11 +1083,11 @@
             const textSpan = document.getElementById('capacity-text');
 
             if (availableSeats < state.studentCount) {
-                alertBox.className = 'p-2 rounded-lg bg-rose-50 border border-rose-300 text-xs text-rose-800 font-semibold';
+                alertBox.className = 'p-2.5 rounded-xl bg-rose-50 border border-rose-300 text-xs text-rose-800 font-semibold';
                 textSpan.innerHTML = `座位不足！可用 ${availableSeats} 格，學生 ${state.studentCount} 人。請增加排數或空列。`;
             } else {
                 const emptyLeft = availableSeats - state.studentCount;
-                alertBox.className = 'p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800';
+                alertBox.className = 'p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800';
                 textSpan.innerHTML = `可用 ${availableSeats} 格（不排人 ${disabledCount} 格，排完剩 ${emptyLeft} 空位）`;
             }
         }
@@ -1297,7 +1287,7 @@
         }
 
         /**************************************************************
-         * SEAT GRID RENDERING (MULTI-DEVICE ADAPTIVE)
+         * SEAT GRID RENDERING (TRUE MOBILE ADAPTIVE)
          **************************************************************/
         function renderClassroomGrid() {
             const totalRows = getTotalRows();
@@ -1307,19 +1297,20 @@
             const containerEl = document.getElementById('classroom-container');
 
             if (state.fitToScreen) {
-                // Fit all columns into current viewport without horizontal scrolling
+                // Strictly fit within 100% viewport width without forcing horizontal page zoom
                 gridEl.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
                 colHeadersEl.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
-                if (window.innerWidth < 640 && cols >= 5) {
-                    containerEl.classList.add('fit-screen-grid');
-                } else {
-                    containerEl.classList.remove('fit-screen-grid');
-                }
+                gridEl.style.minWidth = '0px';
+                colHeadersEl.style.minWidth = '0px';
+                containerEl.classList.add('fit-screen-grid');
             } else {
+                // Comfortable large card mode with smooth internal horizontal scrolling
                 containerEl.classList.remove('fit-screen-grid');
-                const cellMinW = state.mobileCellMinW || 105;
-                gridEl.style.gridTemplateColumns = `repeat(${cols}, minmax(${cellMinW}px, 1fr))`;
-                colHeadersEl.style.gridTemplateColumns = `repeat(${cols}, minmax(${cellMinW}px, 1fr))`;
+                const minW = cols * 105;
+                gridEl.style.gridTemplateColumns = `repeat(${cols}, minmax(98px, 1fr))`;
+                colHeadersEl.style.gridTemplateColumns = `repeat(${cols}, minmax(98px, 1fr))`;
+                gridEl.style.minWidth = `${minW}px`;
+                colHeadersEl.style.minWidth = `${minW}px`;
             }
 
             const rowIndices = [];
@@ -1333,7 +1324,7 @@
             }
 
             colHeadersEl.innerHTML = colIndices.map(c => `
-                <div class="text-center text-[10px] sm:text-xs font-bold text-slate-500 bg-slate-200/75 py-0.5 rounded truncate">
+                <div class="text-center text-[10px] sm:text-xs font-bold text-slate-600 bg-slate-200/80 py-1 rounded truncate">
                     第${c + 1}排
                 </div>
             `).join('');
@@ -1365,13 +1356,9 @@
                     if (isDisabled) {
                         cellsHtml += `
                         <div onclick="handleSeatClick('${seatKey}')"
-                            class="seat-card min-h-[72px] sm:min-h-[86px] rounded-xl border-2 border-dashed border-slate-300 bg-slate-200/60 p-1.5 sm:p-2 flex flex-col items-center justify-center text-slate-400 cursor-pointer relative">
-                            <button onclick="event.stopPropagation(); toggleDisableSeat('${seatKey}')" 
-                                class="seat-action-btn absolute top-1 right-1 w-5 h-5 rounded bg-white text-slate-500 shadow-2xs flex items-center justify-center">
-                                <i class="ph-bold ph-arrow-counter-clockwise text-[10px]"></i>
-                            </button>
-                            <i class="ph-bold ph-prohibit text-base sm:text-lg text-slate-400"></i>
-                            <span class="seat-name-text text-[10px] sm:text-[11px] font-bold text-slate-500">不排人</span>
+                            class="seat-card min-h-[70px] sm:min-h-[86px] rounded-xl border-2 border-dashed border-slate-300 bg-slate-200/60 p-1.5 flex flex-col items-center justify-center text-slate-400 cursor-pointer relative">
+                            <i class="ph-bold ph-prohibit text-sm sm:text-lg text-slate-400"></i>
+                            <span class="seat-name-text text-[10px] sm:text-xs font-bold text-slate-500">不排人</span>
                         </div>
                         `;
                     } else if (student) {
@@ -1381,28 +1368,29 @@
 
                         cellsHtml += `
                         <div id="seat-dom-${seatKey}" onclick="handleSeatClick('${seatKey}')"
-                            class="seat-card min-h-[72px] sm:min-h-[86px] rounded-xl border-2 p-1.5 sm:p-2 flex flex-col justify-between cursor-pointer relative shadow-2xs ${gConf.cardClass} ${isSelected ? 'seat-selected ring-3 ring-indigo-600' : ''} ${hasConflict ? 'border-rose-500 pulse-conflict' : ''} ${isPinned ? 'ring-2 ring-amber-500' : ''}">
+                            class="seat-card min-h-[70px] sm:min-h-[86px] rounded-xl border-2 p-1.5 sm:p-2 flex flex-col justify-between cursor-pointer relative shadow-2xs ${gConf.cardClass} ${isSelected ? 'seat-selected ring-3 ring-indigo-600' : ''} ${hasConflict ? 'border-rose-500 pulse-conflict' : ''} ${isPinned ? 'ring-2 ring-amber-500' : ''}">
                             
-                            <div class="flex items-center justify-between gap-0.5">
+                            <div class="flex items-center justify-between gap-0.5 min-w-0">
                                 <div class="flex items-center gap-0.5 min-w-0">
                                     <span class="seat-top-badge px-1 py-0.2 rounded text-[10px] font-bold shrink-0 ${gConf.headerClass}">
                                         ${student.number}
                                     </span>
+                                    ${isPinned ? `<span class="text-[10px] leading-none">📌</span>` : ''}
                                     ${student.frontPriority ? `<span class="seat-top-badge px-1 bg-indigo-600 text-white rounded text-[9px] font-bold shrink-0">前</span>` : ''}
                                 </div>
-                                <div class="flex items-center gap-0.5 shrink-0">
+                                <div class="seat-action-group flex items-center gap-0.5 shrink-0">
                                     <button type="button" onclick="event.stopPropagation(); togglePinSeat('${seatKey}')"
-                                        class="seat-action-btn w-5 h-5 rounded flex items-center justify-center ${isPinned ? 'bg-amber-500 text-white' : 'text-slate-400 hover:text-amber-600'}">
+                                        class="w-5 h-5 rounded flex items-center justify-center ${isPinned ? 'bg-amber-500 text-white' : 'text-slate-400 hover:text-amber-600'}">
                                         <i class="ph-fill ph-push-pin text-[10px]"></i>
                                     </button>
                                     <button type="button" onclick="event.stopPropagation(); toggleDisableSeat('${seatKey}')"
-                                        class="seat-action-btn w-5 h-5 rounded text-slate-400 hover:text-rose-600 flex items-center justify-center">
+                                        class="w-5 h-5 rounded text-slate-400 hover:text-rose-600 flex items-center justify-center">
                                         <i class="ph-bold ph-prohibit text-[10px]"></i>
                                     </button>
                                 </div>
                             </div>
 
-                            <div class="my-0.5 text-center">
+                            <div class="my-auto py-0.5 text-center min-w-0">
                                 <div class="seat-name-text text-xs sm:text-sm font-bold ${gConf.textClass} truncate">
                                     ${student.name}
                                 </div>
@@ -1413,7 +1401,7 @@
                                     ${hConf.short}
                                 </span>
                                 <span class="text-slate-400 font-medium shrink-0">
-                                    ${isPinned ? '<span class="text-amber-700 font-bold">📌</span>' : `${r + 1}列`}
+                                    ${r + 1}列
                                 </span>
                             </div>
                         </div>
@@ -1421,12 +1409,8 @@
                     } else {
                         cellsHtml += `
                         <div onclick="handleSeatClick('${seatKey}')"
-                            class="seat-card min-h-[72px] sm:min-h-[86px] rounded-xl border-2 border-slate-200 bg-white p-1.5 sm:p-2 flex flex-col items-center justify-center text-slate-400 cursor-pointer relative ${isSelected ? 'seat-selected ring-3 ring-indigo-600' : ''}">
-                            <button onclick="event.stopPropagation(); toggleDisableSeat('${seatKey}')"
-                                class="seat-action-btn absolute top-1 right-1 w-5 h-5 rounded text-slate-400 hover:text-rose-600 flex items-center justify-center">
-                                <i class="ph-bold ph-prohibit text-[10px]"></i>
-                            </button>
-                            <span class="seat-name-text text-[10px] sm:text-[11px] font-medium text-slate-400">空位</span>
+                            class="seat-card min-h-[70px] sm:min-h-[86px] rounded-xl border-2 border-slate-200 bg-white p-1.5 flex flex-col items-center justify-center text-slate-400 cursor-pointer relative ${isSelected ? 'seat-selected ring-3 ring-indigo-600' : ''}">
+                            <span class="seat-name-text text-[10px] sm:text-xs font-medium text-slate-400">空位</span>
                         </div>
                         `;
                     }
@@ -1434,6 +1418,57 @@
             }
 
             gridEl.innerHTML = cellsHtml;
+        }
+
+        function updateSelectedSeatBar() {
+            const bar = document.getElementById('selected-seat-action-bar');
+            const info = document.getElementById('selected-seat-info');
+            const btnPin = document.getElementById('btn-bar-pin');
+            if (!bar) return;
+
+            if (!state.selectedSeatKey) {
+                bar.classList.add('hidden');
+                bar.classList.remove('flex');
+                return;
+            }
+
+            bar.classList.remove('hidden');
+            bar.classList.add('flex');
+
+            const sid = state.seatingMap[state.selectedSeatKey];
+            const stu = sid ? state.students.find(s => s.id === sid) : null;
+            const [r, c] = state.selectedSeatKey.split('-').map(Number);
+
+            if (stu) {
+                info.innerText = `已選：${stu.number}號 ${stu.name}（點另一格可換位）`;
+                btnPin.classList.remove('hidden');
+                btnPin.innerHTML = state.pinnedSeats.has(state.selectedSeatKey)
+                    ? `<i class="ph-fill ph-push-pin-slash"></i> 取消釘選`
+                    : `<i class="ph-fill ph-push-pin"></i> 釘選固定`;
+            } else {
+                info.innerText = `已選：第${r+1}列第${c+1}排 空位（點另一格可移入）`;
+                btnPin.classList.add('hidden');
+            }
+        }
+
+        function triggerBarPin() {
+            if (state.selectedSeatKey) {
+                togglePinSeat(state.selectedSeatKey);
+                state.selectedSeatKey = null;
+                updateUIAll();
+            }
+        }
+
+        function triggerBarDisable() {
+            if (state.selectedSeatKey) {
+                toggleDisableSeat(state.selectedSeatKey);
+            }
+        }
+
+        function clearSelectedSeat() {
+            state.selectedSeatKey = null;
+            updateSelectedSeatBar();
+            renderClassroomGrid();
         }
 
         function toggleDisableSeat(seatKey) {
@@ -1533,12 +1568,14 @@
 
             if (!state.selectedSeatKey) {
                 state.selectedSeatKey = seatKey;
+                updateSelectedSeatBar();
                 renderClassroomGrid();
                 return;
             }
 
             if (state.selectedSeatKey === seatKey) {
                 state.selectedSeatKey = null;
+                updateSelectedSeatBar();
                 renderClassroomGrid();
                 return;
             }
@@ -1860,12 +1897,12 @@
             const detailBox = document.getElementById('conflict-details-box');
 
             if (losViolations.length === 0 && bffViolations.length === 0) {
-                badge.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200';
+                badge.className = 'px-2 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 bg-emerald-50 text-emerald-700 border border-emerald-200';
                 badge.innerHTML = `<i class="ph-fill ph-check-circle text-xs"></i><span>視線正常</span>`;
                 detailBox.classList.add('hidden');
             } else {
                 const total = losViolations.length + bffViolations.length;
-                badge.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-300';
+                badge.className = 'px-2 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 bg-rose-50 text-rose-700 border border-rose-300';
                 badge.innerHTML = `<i class="ph-fill ph-warning-circle text-xs"></i><span>${total} 處衝突</span>`;
 
                 let messages = [];
